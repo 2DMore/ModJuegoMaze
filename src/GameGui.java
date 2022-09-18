@@ -1,9 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.filechooser.*;
 public class GameGui extends JFrame implements ActionListener
 {
+    private static int CTRL=2;
 
     public static void main(String[] args)
     {
@@ -14,20 +14,20 @@ public class GameGui extends JFrame implements ActionListener
     {
         super("Maze, a game of wondering"); //call super to initilize title bar of G.U.I.
         cp=getContentPane();
-        shagLabel = new JLabel("",new ImageIcon("yeababyyea.jpg"),JLabel.LEFT);//GUI background for initial load
+        shagLabel = new JLabel("",new ImageIcon("src/yeababyyea.jpg"),JLabel.LEFT);//GUI background for initial load
         cp.add(shagLabel);
         //Add Exit & New Game Menu Items
         itemExit = new JMenuItem("Exit");
-        itemExit.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_X, KeyEvent.CTRL_MASK));//press CTRL+X to exit if you want
+        itemExit.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_X, CTRL));//press CTRL+X to exit if you want
         itemSaveScore = new JMenuItem("Save High Score");
-        itemSaveScore.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_S, KeyEvent.CTRL_MASK));//press CTRL+S to save high score if you want
+        itemSaveScore.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_S, CTRL));//press CTRL+S to save high score if you want
         itemHighScore=new JMenuItem("High Score");
-        itemHighScore.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_H, KeyEvent.CTRL_MASK));//press CTRL+H to view high score if you want
+        itemHighScore.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_H, CTRL));//press CTRL+H to view high score if you want
         itemEnterName = new JMenuItem("Enter Player Name");
-        itemEnterName.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_N, KeyEvent.CTRL_MASK));//press CTRL+N to enter your name if you want
+        itemEnterName.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_N, CTRL));//press CTRL+N to enter your name if you want
         newGameItem = new JMenuItem("New Game");
         openFileItem = new JMenuItem("Open Maze File.");
-        openFileItem.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_O, KeyEvent.CTRL_MASK));//press CTRL+O to open a level if you want
+        openFileItem.setAccelerator (KeyStroke.getKeyStroke (KeyEvent.VK_O, CTRL));//press CTRL+O to open a level if you want
         newGameItem.setActionCommand("New Game");
         newGameItem.addActionListener(this);
         itemEnterName.setActionCommand("EnterName");
@@ -128,13 +128,12 @@ public class GameGui extends JFrame implements ActionListener
         }//end New Game Command
         else if(e.getActionCommand().equals("EnterName"))//Allows user to enter their name for high score
         {
-               JOptionPane optionPane = new JOptionPane();
-               playerName=optionPane.showInputDialog("Please Enter your Earth Name");      
+               playerName=JOptionPane.showInputDialog("Please Enter your Earth Name");      
         }
         else if(e.getActionCommand().equals("HighScore"))//Displays the high scores
         {
             ScoreGui sg = new ScoreGui();
-            sg.ScoreGui();   
+            sg.scoreGuiInit();   
         }
         else if(e.getActionCommand().equals("SaveScore"))//allows the user to save their score at any time.
         {
@@ -146,7 +145,7 @@ public class GameGui extends JFrame implements ActionListener
             int returnVal = chooser.showOpenDialog(this);
             if(returnVal == JFileChooser.APPROVE_OPTION) 
             {
-                fl.loadFile(chooser.getSelectedFile().getName());//load the file we need
+                fl.loadFile(chooser.getSelectedFile().getAbsolutePath());//load the file we need
                 theArc.setExit(fl.ExitXCord(),fl.ExitYCord());
                 loadMatrixGui("newLoad"); 
             }
@@ -206,10 +205,9 @@ public class GameGui extends JFrame implements ActionListener
  
     public class mazeObject extends JLabel//inner class for each maze object, aka wall, player etc
     {
-    private JLabel imageLabel;
         public mazeObject(String fileName)
         {
-            fileName+=".png";
+            fileName="src/"+fileName+".png";
             JLabel fancyLabel;
             fancyLabel = new JLabel("",new ImageIcon(fileName),JLabel.LEFT);
             newPanel.add(fancyLabel);
@@ -219,11 +217,11 @@ public class GameGui extends JFrame implements ActionListener
     public void nextLevelLoad()
     {
         levelNum+=1;
-        tk.TimeKeeper(timeLeft,ix);//The TimeKeeper object keeps a running tab of the total time the player has used.(for high score)
+        tk.keepTime(timeLeft,ix);//The TimeKeeper object keeps a running tab of the total time the player has used.(for high score)
         timely.stop();//dont count while we are loading the next level.
         theArc = new TheArchitect();//flush everything from TheArchitect so we dont get goffee results
         catFileName+=01;//the next file to be loaded (number)
-        String fileName="level"+catFileName+".maz";
+        String fileName="src/level"+catFileName+".maz";
         System.gc();
         fl.loadFile(fileName);//load the file we need
         scrapMatrix=fl.getGameMatrix();//get the new matrix from the fileloader for the next level.

@@ -1,8 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import javax.swing.*;
-import java.util.*;
 import java.io.*;
 public class ScoreGui extends JDialog implements ActionListener
 {
@@ -11,20 +9,18 @@ public class ScoreGui extends JDialog implements ActionListener
     {
         super();
     }
-    public void ScoreGui()//the ScoreGui Method displays the scores in order from lowest to highest.
+    public void scoreGuiInit()//the ScoreGui Method displays the scores in order from lowest to highest.
     {
         Container cp = getContentPane();
         JButton ok = new JButton("OK");
         ok.setActionCommand("OK");
         ok.addActionListener(this);
-        int lineNum=0;
         cp.add(ok,BorderLayout.SOUTH);
              try{
                     String line = "";
                     String[] myScoreArray = new String[100];
                     for(int i=0; i<myScoreArray.length;i++)
                         myScoreArray[i]=" ";
-                        String line1="";
                     BufferedReader br1 = new BufferedReader(new InputStreamReader(new FileInputStream("scores.txt")));//read in the scores data
                     int recordsCount=0;
                     while((line = br1.readLine()) != null) 
@@ -63,7 +59,8 @@ public class ScoreGui extends JDialog implements ActionListener
                                  }//end for loop
                                 cp.add(scorePanel); 
                            }//end very first if
-                     }//end first while loop            
+                     }//end first while loop
+                     br1.close();            
                 }//end try
                 catch(IOException ex) {
                     JFrame frame = new JFrame("Alert");

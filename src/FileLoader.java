@@ -1,5 +1,4 @@
-import java.awt.*;
-import java.awt.event.*;
+
 import java.io.*;
 import javax.swing.*;
 public class FileLoader
@@ -16,16 +15,16 @@ public class FileLoader
                 MatrixLoader(x,lineNum);//pass the Matrix loader method the line and the line number for parsing.
                 lineNum++;//we will use the line number later in this class
             }
+            in.close();
          }//end try
         catch (IOException e) 
         {  
             JFrame frame = new JFrame("Alert");
             JOptionPane.showMessageDialog(frame, "Ooops IOException error, i did it again!" + e.getMessage());
         }//end catch
-     }//end load file method
+    }//end load file method
      
-     public void MatrixLoader(String fileTextLine, int lineNum)throws gameFileError
-     {
+    public void MatrixLoader(String fileTextLine, int lineNum)throws gameFileError{
         // exitCount=0;//we must reset our variables to zero for the next level.              
         
          int sum=0;
