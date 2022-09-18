@@ -1,8 +1,15 @@
+package mazeGame;
 
 import java.io.*;
 import javax.swing.*;
-public class FileLoader
-{
+import exceptions.*;;
+
+public class FileLoader{
+    private int exitXCord=0;
+    private int exitYCord=0;;
+    private String[][] GameMatrix;
+    private int column;
+    private int row;
     public void loadFile(String fileName)
     {  
         try
@@ -21,10 +28,15 @@ public class FileLoader
         {  
             JFrame frame = new JFrame("Alert");
             JOptionPane.showMessageDialog(frame, "Ooops IOException error, i did it again!" + e.getMessage());
-        }//end catch
+        }catch(GameFileError e){
+            JFrame frame = new JFrame("Alert");
+            JOptionPane.showMessageDialog(frame, "Ooops GameFileError error, i did it again!" + e.getMessage());
+
+        }
+        //end catch
     }//end load file method
      
-    public void MatrixLoader(String fileTextLine, int lineNum)throws gameFileError{
+    public void MatrixLoader(String fileTextLine, int lineNum)throws GameFileError{
         // exitCount=0;//we must reset our variables to zero for the next level.              
         
          int sum=0;
@@ -91,7 +103,7 @@ public class FileLoader
              {
                 // playerCount=0;//we must reset our variables to zero for the next level.
                 // exitCount=0;//we must reset our variables to zero for the next level.
-                 throw new gameFileError();
+                 throw new GameFileError();
              }
              else
              GameMatrix[i1][j1]="W";
@@ -132,20 +144,5 @@ public class FileLoader
         }}//end double for loop
      return totalDimonds;//return the total number of dimonds in the level
     }
-    
-    private class gameFileError extends RuntimeException //if a level is loaded with ether two players or two exits throw this
-    {
-        public gameFileError()
-        {
-            JFrame frame = new JFrame("Alert");
-            JOptionPane.showMessageDialog(frame, "Your maze file ether had more than one player, or more than one exit.");
-         }
-    }//end inner class
-    
-private int exitXCord=0;
-private int exitYCord=0;;
-private String[][] GameMatrix;
-private int column;
-private int row;
 
 }//end class

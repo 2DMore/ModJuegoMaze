@@ -1,3 +1,4 @@
+package mazeGame;
 
 import java.io.*;
 

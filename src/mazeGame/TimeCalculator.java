@@ -1,3 +1,4 @@
+package mazeGame;
 public class TimeCalculator
 {
 int minutes=0;

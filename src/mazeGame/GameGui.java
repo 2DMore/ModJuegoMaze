@@ -1,13 +1,56 @@
+package mazeGame;
 import javax.swing.*;
+
+import exceptions.SlowAssPlayer;
 import java.awt.*;
 import java.awt.event.*;
-public class GameGui extends JFrame implements ActionListener
-{
+
+public class GameGui extends JFrame implements ActionListener{
+    public HighScore hs;  
+    private int catFileName=01;
+    Container cp;
+    FileLoader fl = new FileLoader();
+    //create menu items
+    private JMenuBar menuBar;
+    private JMenu newMenu;
+    private JMenuItem itemExit;
+    private JMenuItem newGameItem;
+    private JMenuItem openFileItem;
+    private JMenuItem itemEnterName;
+    private JMenuItem itemHighScore;
+    private JMenuItem itemSaveScore;
+    //end create menu items
+    private JLabel shagLabel;
+    private int ix;
+    private int jx;
+    private int timeLeft;
+    private JPanel progBarPanel;
+    private JLabel[][] labelMatrix;
+
+    JPanel dimondsPanel=new JPanel();
+    JLabel mainLabel=new JLabel();
+    private TimeCalculator timeCalc;
+    private  JProgressBar progressBar;
+    private mazeObject mo;
+    JPanel newPanel;// = new JPanel();
+    TheArchitect theArc = new TheArchitect();
+    String[][] scrapMatrix; 
+    private  Timer timely; 
+    public TimeKeeper tk;
+    public String playerName;
+    public int levelNum=1;
     private static int CTRL=2;
 
     public static void main(String[] args)
     {
-        new GameGui();
+        try{
+            new GameGui();
+        }catch(Exception e){
+            JPanel ventana = new JPanel();
+            JOptionPane.showMessageDialog(ventana,e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
+            
+        }
+        
     }
 
     public GameGui()
@@ -47,7 +90,6 @@ public class GameGui extends JFrame implements ActionListener
         newMenu.add(itemHighScore);
         newMenu.add(itemSaveScore);
         newMenu.add(itemExit);
-        
         //Add Exit Menu Item
         //Add Menu Bar
         menuBar = new JMenuBar();
@@ -61,62 +103,43 @@ public class GameGui extends JFrame implements ActionListener
         setVisible (true);//show our menu bar and shagLabel.. Yea baby Yea! Whoa.. to much java.
     }//end constructor
      
-    private class MyKeyHandler extends KeyAdapter //captures arrow keys movement
-    {
-        public void keyPressed (KeyEvent theEvent)
-       {         
-           switch (theEvent.getKeyCode())
-           {
-               case KeyEvent.VK_UP:
-               {
-                 theArc.playerMove(-1,0,scrapMatrix,fl.dimondCount());//let the Architect know we moved, along with the current matrix
-                 loadMatrixGui("updateLoad");//reload the gui to show the move
-                 if (theArc.getLevel()==true)
-                 {
-                    nextLevelLoad();//if the player hit an exit door, load the next level
-                 }
-                 break;
-              }
-              case KeyEvent.VK_DOWN:
-              {
-                 theArc.playerMove(1,0,scrapMatrix,fl.dimondCount());//see above
-                 loadMatrixGui("updateLoad");//see above
-                 if (theArc.getLevel()==true)//see above
-                 {
-                    nextLevelLoad();//see above
-                 }
-                 break;
-             }
-             case KeyEvent.VK_LEFT:
-             {
-                theArc.playerMove(0,-1,scrapMatrix,fl.dimondCount());//see above
-                loadMatrixGui("updateLoad");//see above
-                 if (theArc.getLevel()==true)//see above
-                 {
-                     nextLevelLoad();//see above
-                 }
-                break;
-             }
-             case KeyEvent.VK_RIGHT:
-             { 
-                theArc.playerMove(0,1,scrapMatrix,fl.dimondCount()); //see above
-                loadMatrixGui("updateLoad");//see above
-                 if (theArc.getLevel()==true)
-                 {
-                     nextLevelLoad();//see above
-                 }
-                break;   
-             }
-           }//end switch
-           JLabel mainLabel=new JLabel("Total Dimonds Left to Collect"+theArc.getDimondsLeft()+"", JLabel.CENTER);//show how many dimonds are left to collect on the gui!
-           JPanel dimondsPanel = new JPanel();
-           dimondsPanel.add(mainLabel);
-           cp.add(dimondsPanel,BorderLayout.SOUTH);
-       }//end method
-   }//end inner class
-    
-    public void actionPerformed(ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e){
+        switch(e.getActionCommand()){
+            case "Exit":
+            System.exit(0);
+            break;
+
+            case "New Game":
+            setName();
+            OpenMeze("src/level1.maz");
+            break;
+
+            case "EnterName":
+            setName();
+            break;
+
+            case "HighScore":
+            ScoreGui sg = new ScoreGui();
+            sg.scoreGuiInit();  
+            break; 
+
+            case "SaveScore": 
+            hs.addHighScore(playerName,tk.getMinutes(),tk.getSeconds(),levelNum);
+            break;
+
+            case "Open":
+            JFileChooser chooser = new JFileChooser();
+            int returnVal = chooser.showOpenDialog(this);
+            if(returnVal == JFileChooser.APPROVE_OPTION) 
+            {
+                OpenMeze(chooser.getSelectedFile().getAbsolutePath());//load the file we need
+            }
+            break;
+
+
+
+        }
+        /* 
         if (e.getActionCommand().equals("Exit"))//exit on the menu bar
         {
              new Timer(1000, updateCursorAction).stop();
@@ -128,7 +151,7 @@ public class GameGui extends JFrame implements ActionListener
         }//end New Game Command
         else if(e.getActionCommand().equals("EnterName"))//Allows user to enter their name for high score
         {
-               playerName=JOptionPane.showInputDialog("Please Enter your Earth Name");      
+            setName();  
         }
         else if(e.getActionCommand().equals("HighScore"))//Displays the high scores
         {
@@ -145,17 +168,41 @@ public class GameGui extends JFrame implements ActionListener
             int returnVal = chooser.showOpenDialog(this);
             if(returnVal == JFileChooser.APPROVE_OPTION) 
             {
-                fl.loadFile(chooser.getSelectedFile().getAbsolutePath());//load the file we need
-                theArc.setExit(fl.ExitXCord(),fl.ExitYCord());
-                loadMatrixGui("newLoad"); 
+                OpenMeze(chooser.getSelectedFile().getAbsolutePath());//load the file we need
             }
-         }
+         }*/
      }//end actionPerformed method
+
+    public void OpenMeze(String filePath){
+        fl.loadFile(filePath);//load the file we need
+        theArc.setExit(fl.ExitXCord(),fl.ExitYCord());
+        loadMatrixGui("newLoad"); 
+    }
+
+    public void setName(){
+        playerName=JOptionPane.showInputDialog("Please Enter your Earth Name");
+    }
+
+    public void reloadDiamondLabel(){
+        //JLabel mainLabel=new JLabel(theArc.collected+"/"+theArc.globalTotalDimonds+" Diamonds", JLabel.CENTER);//show how many dimonds are left to collect on the gui!
+        mainLabel.setText(theArc.collected+"/"+theArc.globalTotalDimonds+" Diamonds");
+        mainLabel.setHorizontalAlignment(JLabel.CENTER);
+        dimondsPanel = new JPanel();
+        dimondsPanel.add(mainLabel);
+        cp.remove(dimondsPanel);
+        cp.add(dimondsPanel,BorderLayout.SOUTH);
+    }
+
      
      public void loadMatrixGui(String event)
      {
         if (event == "newLoad")
-         {       
+         {  System.gc();
+            theArc.globalTotalDimonds = fl.dimondCount(); //Set the total diamonds
+            remove(mainLabel); 
+            remove(dimondsPanel);
+            reloadDiamondLabel();
+            
              remove(newPanel);//remove the previous level's game from the screen
              if(progBarPanel !=null)//remove the progress bar from the gui as long as its already been created.
              remove(progBarPanel);
@@ -165,6 +212,7 @@ public class GameGui extends JFrame implements ActionListener
                 for (int j = 0; j < scrapMatrix[i].length; j++){
                     scrapMatrix[i][j]= temp[i][j];//create a new matrix so we dont have a refrence to another objects matrix!
               }}//end double for loop
+             
              timeCalc = new TimeCalculator();//create the time calculator used to determine how much time each level is given.
              timeCalc.calcTimeforMaze(fl.dimondCount(),fl.getMatrixSizeRow(),fl.getMatrixSizeColumn());//let time calculator know the parameters of the game 
              timeLeft=timeCalc.getMinutes();//get the minutes allowed for the level
@@ -180,20 +228,21 @@ public class GameGui extends JFrame implements ActionListener
              newPanel = new JPanel();
              newPanel.setLayout(new GridLayout(fl.getMatrixSizeRow(),fl.getMatrixSizeColumn()));//set our panel for the game to the size of the matrix      
              labelMatrix=new JLabel[fl.getMatrixSizeRow()][fl.getMatrixSizeColumn()];
-             newPanel.addKeyListener( new MyKeyHandler() );
+             newPanel.addKeyListener( new MyKeyHandler(this) );
         }//end if
         else if(event =="updateLoad")//every time the player moves the gui must be updated.
         {
+            reloadDiamondLabel();
             scrapMatrix = theArc.getUpdatedMatrix();//get the new matrix to be displayed from the architect
             remove(newPanel);//remove the old game
             newPanel = new JPanel();
             newPanel.setLayout(new GridLayout(fl.getMatrixSizeRow(),fl.getMatrixSizeColumn()));
-            newPanel.addKeyListener( new MyKeyHandler() );
+            newPanel.addKeyListener( new MyKeyHandler(this) );
             newPanel.grabFocus();        
         }
           for (int i = 0; i < labelMatrix.length; i++){
               for (int j = 0; j < labelMatrix[i].length; j++){
-                  labelMatrix[i][j]=  mo=new mazeObject(scrapMatrix[i][j]);//add our maze images into the gui
+                  labelMatrix[i][j]=  mo=new mazeObject(this, scrapMatrix[i][j]);//add our maze images into the gui
               }}//end double for loop
          cp.add(newPanel);
          remove(shagLabel);//remove the constructors initial background
@@ -203,17 +252,6 @@ public class GameGui extends JFrame implements ActionListener
          newPanel.grabFocus();  
      }//end loadMatrixGui method
  
-    public class mazeObject extends JLabel//inner class for each maze object, aka wall, player etc
-    {
-        public mazeObject(String fileName)
-        {
-            fileName="src/"+fileName+".png";
-            JLabel fancyLabel;
-            fancyLabel = new JLabel("",new ImageIcon(fileName),JLabel.LEFT);
-            newPanel.add(fancyLabel);
-        }
-    }//end inner class
-        
     public void nextLevelLoad()
     {
         levelNum+=1;
@@ -230,7 +268,7 @@ public class GameGui extends JFrame implements ActionListener
     }
  
     Action updateCursorAction = new AbstractAction() {
-    public void actionPerformed(ActionEvent e)throws SlowAssPlayer //this inner class generates an exeption if the player takes to long to finish a level 
+    public void actionPerformed(ActionEvent e)throws SlowAssPlayer
     {
         ix-=1;
         jx+=1;
@@ -250,8 +288,9 @@ public class GameGui extends JFrame implements ActionListener
         setVisible (true);
         timely.stop();
         catFileName-=01;
-    if(catFileName<01)
-        throw new SlowAssPlayer("Slow ass took to long.");
+    if(catFileName<01){
+        throw new SlowAssPlayer(GameGui.this, "Slow ass took to long.");
+    } 
     else
         loadMatrixGui("newLoad");
     }//end first if
@@ -259,46 +298,6 @@ public class GameGui extends JFrame implements ActionListener
         progressBar.setString(timeLeft+":"+ix);
     }//end actionPerformed
 };//end class
-
-    private class SlowAssPlayer extends RuntimeException
-    {
-        public SlowAssPlayer(String event)
-        {
-            //the game is over, here we must tell our high score method to recond the details.
-            hs.addHighScore(playerName,tk.getMinutes(),tk.getSeconds(),levelNum);
-            JFrame frame = new JFrame("Warning");
-            JOptionPane.showMessageDialog(frame, "You Stupid Ass, Did you eat to much for dinner?  Move Faster!");//the entire game has ended.
-        }
-    }//end class
     
-private HighScore hs;  
-private int catFileName=01;
-private Container cp;
-private FileLoader fl = new FileLoader();
-//create menu items
-private JMenuBar menuBar;
-private JMenu newMenu;
-private JMenuItem itemExit;
-private JMenuItem newGameItem;
-private JMenuItem openFileItem;
-private JMenuItem itemEnterName;
-private JMenuItem itemHighScore;
-private JMenuItem itemSaveScore;
-//end create menu items
-private JLabel shagLabel;
-private int ix;
-private int jx;
-private int timeLeft;
-private JPanel progBarPanel;
-private JLabel[][] labelMatrix;
-private TimeCalculator timeCalc;
-private  JProgressBar progressBar;
-private mazeObject mo;
-private JPanel newPanel;// = new JPanel();
-private TheArchitect theArc = new TheArchitect();
-private String[][] scrapMatrix; 
-private  Timer timely; 
-private TimeKeeper tk;
-private  String playerName;
-private int levelNum=1;
+
 }//end class    

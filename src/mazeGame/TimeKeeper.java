@@ -1,3 +1,4 @@
+package mazeGame;
 public class TimeKeeper{
 	int minutes=0; 
 	int seconds=0;
