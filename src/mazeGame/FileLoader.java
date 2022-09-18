@@ -10,7 +10,7 @@ public class FileLoader{
     private String[][] GameMatrix;
     private int column;
     private int row;
-    public void loadFile(String fileName)
+    public void loadFile(String fileName) throws IOException 
     {  
         try
         {
@@ -23,11 +23,11 @@ public class FileLoader{
                 lineNum++;//we will use the line number later in this class
             }
             in.close();
-         }//end try
+        /* 
         catch (IOException e) 
         {  
             JFrame frame = new JFrame("Alert");
-            JOptionPane.showMessageDialog(frame, "Ooops IOException error, i did it again!" + e.getMessage());
+            JOptionPane.showMessageDialog(frame, "Ooops IOException error, i did it again!" + e.getMessage());*/
         }catch(GameFileError e){
             JFrame frame = new JFrame("Alert");
             JOptionPane.showMessageDialog(frame, "Ooops GameFileError error, i did it again!" + e.getMessage());

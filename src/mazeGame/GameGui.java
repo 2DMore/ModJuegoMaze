@@ -4,10 +4,11 @@ import javax.swing.*;
 import exceptions.SlowAssPlayer;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 public class GameGui extends JFrame implements ActionListener{
     public HighScore hs;  
-    private int catFileName=01;
+    private int catFileName=1;
     Container cp;
     FileLoader fl = new FileLoader();
     //create menu items
@@ -174,7 +175,13 @@ public class GameGui extends JFrame implements ActionListener{
      }//end actionPerformed method
 
     public void OpenMeze(String filePath){
-        fl.loadFile(filePath);//load the file we need
+        try{
+            fl.loadFile(filePath);
+        }catch(Exception e){
+            JOptionPane.showMessageDialog(this, "Level Not Found", "Error", JOptionPane.ERROR_MESSAGE);
+           this.dispose();
+        }
+        //load the file we need
         theArc.setExit(fl.ExitXCord(),fl.ExitYCord());
         loadMatrixGui("newLoad"); 
     }
@@ -261,10 +268,18 @@ public class GameGui extends JFrame implements ActionListener{
         catFileName+=01;//the next file to be loaded (number)
         String fileName="src/level"+catFileName+".maz";
         System.gc();
-        fl.loadFile(fileName);//load the file we need
-        scrapMatrix=fl.getGameMatrix();//get the new matrix from the fileloader for the next level.
-        theArc.setExit(fl.ExitXCord(),fl.ExitYCord());
-        loadMatrixGui("newLoad");         
+        try {
+            fl.loadFile(fileName);
+            scrapMatrix=fl.getGameMatrix();//get the new matrix from the fileloader for the next level.
+            theArc.setExit(fl.ExitXCord(),fl.ExitYCord());
+            loadMatrixGui("newLoad");      
+        } catch (IOException e) {
+            hs.addHighScore(playerName,tk.getMinutes(),tk.getSeconds(),levelNum);
+           JOptionPane.showMessageDialog(this, "No more levels for you", "End of game", JOptionPane.INFORMATION_MESSAGE);
+           this.dispose();
+           new GameGui();
+        }//load the file we need
+           
     }
  
     Action updateCursorAction = new AbstractAction() {
